@@ -268,6 +268,36 @@ public class TestArraySqlFunctions
     }
 
     @Test
+    public void testArrayMostFrequent()
+    {
+        // Base Case
+        assertFunction("ARRAY_MOST_FREQUENT(ARRAY [1, 2, 2, 4, 4, 4, 3, 3, 3])", new ArrayType(INTEGER), ImmutableList.of(4));
+        assertFunction("ARRAY_MOST_FREQUENT(ARRAY ['k', 'a', 'b', 'k', 'b', 'c', 'c', 'k', 'c'])", new ArrayType(createVarcharType(1)), ImmutableList.of("k"));
+        assertFunction("ARRAY_MOST_FREQUENT(ARRAY [1, 1, 2, 2, 3, 3])", new ArrayType(INTEGER), ImmutableList.of(3));
+        assertFunction("ARRAY_MOST_FREQUENT(ARRAY [DOUBLE '1.0', DOUBLE '-7.0', DOUBLE '7.0', DOUBLE '2.0', DOUBLE '-7.0', DOUBLE '3.0'])", new ArrayType(DOUBLE), asList(-7.0d));
+        assertFunction("ARRAY_MOST_FREQUENT(ARRAY [DOUBLE '1.0', DOUBLE '7.0', DOUBLE '2.0', DOUBLE '3.0'])", new ArrayType(DOUBLE), asList(7.0d));
+        assertFunction("ARRAY_MOST_FREQUENT(ARRAY ['abc', 'bc', 'aaa'])", new ArrayType(createVarcharType(3)), ImmutableList.of("bc"));
+        assertFunction("ARRAY_MOST_FREQUENT(ARRAY ['abc', 'mbc', 'bc', 'lbc', 'mbd', 'aaa'])", new ArrayType(createVarcharType(3)), ImmutableList.of("mbd"));
+        assertFunction("ARRAY_MOST_FREQUENT(ARRAY ['  ', '', '', ' ',  ' ', '  '])", new ArrayType(createVarcharType(2)), ImmutableList.of("  "));
+        // Empty Case
+        assertFunction("ARRAY_MOST_FREQUENT(ARRAY [])", new ArrayType(UNKNOWN), null);
+        // Null Case
+        assertFunction("ARRAY_MOST_FREQUENT(null)", new ArrayType(UNKNOWN), null);
+        assertFunction("ARRAY_MOST_FREQUENT(ARRAY [NULL])", new ArrayType(UNKNOWN), null);
+        assertFunction("ARRAY_MOST_FREQUENT(ARRAY [1, 2, 2, NULL])", new ArrayType(INTEGER), ImmutableList.of(2));
+        assertFunction("ARRAY_MOST_FREQUENT(ARRAY [1, 2, 2, NULL, NULL])", new ArrayType(INTEGER), ImmutableList.of(2));
+        assertFunction("ARRAY_MOST_FREQUENT(ARRAY [NULL, NULL, NULL])", new ArrayType(UNKNOWN), null);
+        // Complex Case
+        RowType rowType = RowType.from(ImmutableList.of(RowType.field(INTEGER), RowType.field(INTEGER)));
+        assertFunction("ARRAY_MOST_FREQUENT(ARRAY [ROW(1, 2), ROW(2, 3), ROW(2, 3)])", new ArrayType(rowType), ImmutableList.of(ImmutableList.of(2, 3)));
+        assertFunction("ARRAY_MOST_FREQUENT(ARRAY [ROW(1, 2), ROW(1, 3)])", new ArrayType(rowType), ImmutableList.of(ImmutableList.of(1, 3)));
+        assertFunction("ARRAY_MOST_FREQUENT(ARRAY [ROW(1, 2), ROW(0, 1), ROW(0, 2)])", new ArrayType(rowType), ImmutableList.of(ImmutableList.of(1, 2)));
+
+        RowType rowTypeChar = RowType.from(ImmutableList.of(RowType.field(createVarcharType(3)), RowType.field(createVarcharType(3))));
+        assertFunction("ARRAY_MOST_FREQUENT(ARRAY [ROW('klm', 'kaa'), ROW('jzl', 'zzz'), ROW('azb', 'bzz'), ROW('jkl', 'jkl')])", new ArrayType(rowTypeChar), ImmutableList.of(ImmutableList.of("klm", "kaa")));
+    }
+
+    @Test
     public void testArraySortDesc()
     {
         assertFunction("ARRAY_SORT_DESC(ARRAY [100, 1, 10, 50])", new ArrayType(INTEGER), ImmutableList.of(100, 50, 10, 1));

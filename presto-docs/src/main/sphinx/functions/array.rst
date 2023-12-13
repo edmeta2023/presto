@@ -111,6 +111,10 @@ Array Functions
 
         SELECT array_min_by(ARRAY ['a', 'bbb', 'cc'], x -> LENGTH(x)) -- 'a'
 
+.. function:: array_most_frequent(array(T)) -> array(T)
+
+    Returns the most frequent element of an array. If there are multiple elements with same frequency, the function returns the biggest in input.
+
 .. function:: array_normalize(x, p) -> array
 
    Normalizes array ``x`` by dividing each element by the p-norm of the array.

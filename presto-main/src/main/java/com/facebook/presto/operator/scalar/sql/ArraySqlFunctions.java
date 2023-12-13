@@ -137,6 +137,16 @@ public class ArraySqlFunctions
                 "]";
     }
 
+    @SqlInvokedScalarFunction(value = "array_most_frequent", deterministic = true, calledOnNullInput = true)
+    @Description("Determines the most frequent element in the array. If there are multiple elements, the function returns the biggest element in input")
+    @TypeParameter("T")
+    @SqlParameter(name = "input", type = "array(T)")
+    @SqlType("array<T>")
+    public static String array_most_frequent()
+    {
+        return "RETURN IF(COALESCE(CARDINALITY(REMOVE_NULLS(input)), 0) = 0, NULL, TRANSFORM(SLICE(ARRAY_SORT_DESC(TRANSFORM(MAP_ENTRIES(ARRAY_FREQUENCY(REMOVE_NULLS(input))), x -> ROW(x[2], x[1]))), 1, 1), x -> x[2]))";
+    }
+
     @SqlInvokedScalarFunction(value = "array_sort_desc", deterministic = true, calledOnNullInput = true)
     @Description("Sorts the given array in descending order according to the natural ordering of its elements.")
     @TypeParameter("T")
